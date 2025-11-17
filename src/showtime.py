@@ -1,6 +1,6 @@
 from datetime import time
 class showtime:
-    def __init__(self, showtimeID: str, startAt: time):
+    def __init__(self, showtimeID: str, startAt: time, movieId: str, ):
         self.showtimeID = showtime
         self.startAt = startAt
     
@@ -11,5 +11,4 @@ class showtime:
         showtimeID = input("Eneter Show Time ID: ")
         startAt = input ("Enter the Start Time of the Movie:")
         return cls(showtimeId = showtimeID, startAt=startAt)
-    
     
