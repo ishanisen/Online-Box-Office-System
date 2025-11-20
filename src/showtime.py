@@ -1,14 +1,14 @@
-from datetime import time
-class showtime:
-    def __init__(self, showtimeID: str, startAt: time, movieId: str, ):
-        self.showtimeID = showtime
-        self.startAt = startAt
-    
-    def __str__(self):
-        return f"{self.showtimeID} at {self.startAt}"
+from datetime import datetime, time
 
-    def read(cls):
-        showtimeID = input("Eneter Show Time ID: ")
-        startAt = input ("Enter the Start Time of the Movie:")
-        return cls(showtimeId = showtimeID, startAt=startAt)
-    
+class Showtime:
+    def __init__(self, showtimeID: str, startAt: time, movieId: str, auditoriumId: str):
+        self.showtimeID = showtimeID
+        self.startAt = startAt
+        self.movieId = movieId
+        self.auditoriumId = auditoriumId
+
+    def __str__(self):
+        return f"Showtime ID: {self.showtimeID} at {self.startAt.strftime('%H:%M')} for Movie ID: {self.movieId} in Auditorium: {self.auditoriumId}"
+
+
+

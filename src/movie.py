@@ -14,17 +14,6 @@ class Movie:
             f"Run Time: {self.runtimeMin} mins\n"
             f"Language: {self.language}"
         )
-
-    @classmethod
-    def read(cls):
-        movieId = input("Enter Movie ID: ")
-        title = input("Enter movie title: ")
-        rating = input("Enter movie rating: ")
-        runtime = int(input("Enter runtime in minutes: "))
-        language = input("Enter language: ")
-        return cls(movieId=movieId, title=title, rating=rating, runtimeMin=runtime, language=language)
-
-
-#movie1 = movie("Avataar", PG-13, 300, "English")
-#print(movie1)
-        
+    def get_showtimes(self, all_showtimes):
+        return [s for s in all_showtimes if s.movieId == self.movieId]
+    
