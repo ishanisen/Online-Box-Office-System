@@ -6,6 +6,5 @@ class Order:
         self.taxTotal = taxTotal
         self.grandTotal = round(subtotal + feesTotal + taxTotal, 2)
 
-
-def __str__(self):
-    return f"Order {self.orderNumber} — Total: ${self.grandTotal:.2f}"
+    def __str__(self):
+        return f"Order {self.orderNumber} — Total: ${self.grandTotal:.2f}"
