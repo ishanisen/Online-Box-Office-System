@@ -6,6 +6,5 @@ class Ticket:
         self.seatId = seatId
         self.orderNumber = orderNumber
 
-
-def __str__(self):
-    return f"Ticket {self.ticketId}: Seat {self.seatId}, Showtime {self.showtimeId}, Order {self.orderNumber}"
+    def __str__(self):
+        return f"Ticket {self.ticketId}: Seat {self.seatId}, Showtime {self.showtimeId}, Order {self.orderNumber}"
