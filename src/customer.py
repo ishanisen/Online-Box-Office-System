@@ -7,7 +7,6 @@ class Customer:
         self.password = password
         self.orders = []
 
-
     def __str__(self):
         return f"{self.firstName} {self.lastName} ({self.email})"
     
