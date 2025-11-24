@@ -5,6 +5,5 @@ class Payment:
         self.paymentProvider = paymentProvider
         self.paymentStatus = paymentStatus
 
-
-def __str__(self):
-    return f"Payment {self.paymentId}: ${self.amount:.2f} via {self.paymentProvider} — {self.paymentStatus}"
+    def __str__(self):
+        return f"Payment {self.paymentId}: ${self.amount:.2f} via {self.paymentProvider} — {self.paymentStatus}"
