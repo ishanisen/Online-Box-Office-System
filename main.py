@@ -11,6 +11,58 @@ from src.ticket import Ticket
 from src.customer import Customer  # ensure class path matches your project
 
 import uuid
+import csv
+import os
+
+
+def save_ticket_to_csv(ticket, customer=None):
+    """Append ticket to tickets.csv file"""
+    csv_file = "tickets.csv"
+    file_exists = os.path.isfile(csv_file)
+    
+    with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            # Write header if file doesn't exist
+            writer.writerow(["TicketId", "QRCode", "ShowtimeId", "SeatId", "OrderNumber", "CustomerEmail", "CustomerName"])
+        
+        customer_email = customer.email if customer else "Guest"
+        customer_name = f"{customer.firstName} {customer.lastName}" if customer else "Guest"
+        writer.writerow([ticket.ticketId, ticket.qrCode, ticket.showtimeId, ticket.seatId, ticket.orderNumber, customer_email, customer_name])
+
+
+def save_customer_to_csv(customer):
+    """Append customer to customers.csv file"""
+    csv_file = "customers.csv"
+    file_exists = os.path.isfile(csv_file)
+    
+    with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            # Write header if file doesn't exist
+            writer.writerow(["CustomerId", "FirstName", "LastName", "Email", "Password"])
+        writer.writerow([customer.customerId, customer.firstName, customer.lastName, customer.email, customer.password])
+
+
+def load_customers_from_csv():
+    """Load customers from CSV file into customers list"""
+    csv_file = "customers.csv"
+    if not os.path.isfile(csv_file):
+        return
+    
+    with open(csv_file, mode='r', newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            # Check if customer already exists (avoid duplicates)
+            if not any(c.customerId == row["CustomerId"] for c in customers):
+                customer = Customer(
+                    row["CustomerId"],
+                    row["FirstName"],
+                    row["LastName"],
+                    row["Email"],
+                    row["Password"]
+                )
+                customers.append(customer)
 
 
 def login_or_register():
@@ -35,6 +87,7 @@ def login_or_register():
         pw = input("Password: ").strip()
         user = Customer(cid, fn, ln, em, pw)
         customers.append(user)
+        save_customer_to_csv(user)
         print(f"Registered. Welcome, {fn}!\n")
         return user
 
@@ -144,6 +197,9 @@ def checkout(customer, showtime, seat):
     if customer:
         customer.orders.append(order)
 
+    # Save ticket to CSV
+    save_ticket_to_csv(ticket, customer)
+
     print("\nPayment successful!")
     print(payment)
     print("Your ticket:")
@@ -152,6 +208,9 @@ def checkout(customer, showtime, seat):
 
 
 def main_menu():
+    # Load existing customers from CSV on startup
+    load_customers_from_csv()
+    
     print("Welcome to the CLI Movie Booking")
     user = None
     while True:
