@@ -1,0 +1,4 @@
+TicketId,QRCode,ShowtimeId,SeatId,OrderNumber,CustomerEmail,CustomerName
+TKT-6B62E7A6,QR-0f83ab858d,S01,A01-A1,ORD-38E3424E,Guest,Guest
+TKT-871E8075,QR-28bb0bb8ca,S01,A01-A1,ORD-66455ED5,test1@,test 1
+TKT-A02A26E9,QR-df9b48d798,S03,A03-C6,ORD-3E99E997,test1@,test 1
