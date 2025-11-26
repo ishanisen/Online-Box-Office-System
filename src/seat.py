@@ -1,4 +1,4 @@
-class seat:
+class Seat:
     def __init__(self, seatID: str, rowLabel:str, seatNumber: int, auditoriumId: str):
         self.seatId= seatID
         self.rowLabel = rowLabel

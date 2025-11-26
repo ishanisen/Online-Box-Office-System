@@ -1,10 +1,13 @@
+import sys
+sys.path.insert(0,"src/")
+
 import uuid
 from typing import List
-from src.movie import Movie
-from src.theater import Theater
-from src.auditorium import Auditorium
-from src.showtime import Showtime
-from src.seat import Seat
+from movie import Movie
+from theater import Theater
+from auditorium import Auditorium
+from showtime import Showtime
+from seat import Seat
 
 
 # find helpers
