@@ -1,13 +1,15 @@
+# Auditorium class 
 class Auditorium:
-    def __init__(self, auditoriumID: str, audName: str):
+    def __init__(self, auditoriumID: str, audName: str, theaterID: str):
         self.auditoriumID = auditoriumID
         self.audName = audName
-
+        self.theaterID = theaterID
+# string method
     def __str__(self):
         return f"Auditorium ID: {self.auditoriumID}\n Auditorium Name: {self.audName}"
     
     def get_seats(self, all_seats):
-        return [s for s in all_seats if s.auditoriumId == self.auditoriumId]
+        return [s for s in all_seats if s.auditoriumID == self.auditoriumID]
 
     def find_seat(self, all_seats, rowLabel, seatNumber):
         return next(
