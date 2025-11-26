@@ -1,4 +1,4 @@
-class theater:
+class Theater:
     def __init__(self, theaterID: str, theaterName: str, address: str):
         self.theaterID = theaterID
         self.theaterName = theaterName
