@@ -1,9 +1,9 @@
 class Seat:
-    def __init__(self, seatID: str, rowLabel:str, seatNumber: int, auditoriumId: str):
-        self.seatId= seatID
+    def __init__(self, seatID: str, rowLabel:str, seatNumber: int, auditoriumID: str):
+        self.seatID = seatID
         self.rowLabel = rowLabel
-        self.seatNUmber = seatNumber
-        self.aiditoriumId = auditoriumId
+        self.seatNumber = seatNumber
+        self.auditoriumID  = auditoriumID
         self.taken = False
 
     def label(self):

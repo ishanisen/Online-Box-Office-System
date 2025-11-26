@@ -8,16 +8,19 @@ class Auditorium:
     def __str__(self):
         return f"Auditorium ID: {self.auditoriumID}\n Auditorium Name: {self.audName}"
     
+# Method to filter and return only seats that belong to this auditorium from a list all_seats
     def get_seats(self, all_seats):
         return [s for s in all_seats if s.auditoriumID == self.auditoriumID]
+    
+#  finds a specific seat in the auditorium    MIGHT NOT NEED THIS!!!!!!!!!!!!!!!!!!!
+#     def find_seat(self, all_seats, rowLabel, seatNumber):
+#         return next(
+#             (s for s in all_seats 
+#              if s.auditoriumID== self.auditoriumID
+#              and s.label() == f"{rowLabel}{seatNumber}"),
+#             None
+#         )
 
-    def find_seat(self, all_seats, rowLabel, seatNumber):
-        return next(
-            (s for s in all_seats 
-             if s.auditoriumId == self.auditoriumId 
-             and s.label() == f"{rowLabel}{seatNumber}"),
-            None
-        )
 
     def display_seating_chart(self, all_seats):
         seats = self.get_seats(all_seats)
