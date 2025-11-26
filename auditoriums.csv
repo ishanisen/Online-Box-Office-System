@@ -2,7 +2,7 @@ auditoriumID,auditoriumName,theaterID
 A01,Auditorium 1,T01
 A02,Auditorium 2,T01
 A03,Auditorium 1,T02
-A04,Auditorium 2,T02,
+A04,Auditorium 2,T02
 A05,Auditorium 1,T03
 A06,Auditorium 2,T03
 A07,Auditorium 1,T04

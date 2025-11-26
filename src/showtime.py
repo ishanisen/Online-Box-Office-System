@@ -1,8 +1,9 @@
-from datetime import datetime, time
+from datetime import datetime, time, date
 
 class Showtime:
-    def __init__(self, showtimeID: str, startAt: time, movieID: str, auditoriumID: str):
+    def __init__(self, showtimeID: str, date: date, startAt: time, movieID: str, auditoriumID: str):
         self.showtimeID = showtimeID
+        self.date = date
         self.startAt = startAt
         self.movieID = movieID
         self.auditoriumID = auditoriumID

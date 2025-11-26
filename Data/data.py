@@ -52,26 +52,3 @@ Showtime("S05", "2025-11-20 17:30", "M04", "A05"),
 Showtime("S06", "2025-11-20 16:00", "M04", "A06"),
 Showtime("S07", "2025-11-20 17:00", "M01", "A01"),
 
-
-]
-
-
-# Seats (rows A-C, seats 1-6) for each auditorium
-seats = []
-for aud in auditoriums:
-    for r_label in ["A","B","C"]:
-        for num in range(1,7):
-            seat_id = f"{aud.auditoriumId}-{r_label}{num}"
-seats.append(Seat(seat_id, r_label, num, aud.auditoriumId))
-
-
-# Preload example customers
-customers = [
-Customer("C001", "Alice", "Smith", "alice@example.com", "pass1"),
-Customer("C002", "Bob", "Jones", "bob@example.com", "pass2")
-]
-
-# storage for runtime-created objects
-orders = []
-payments = []
-tickets = []
