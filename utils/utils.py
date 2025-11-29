@@ -1,6 +1,6 @@
 import uuid
 from typing import List
-from Data.movie import Movie
+#from Data.movie import Movie
 from src.theater import Theater
 from src.auditorium import Auditorium
 from src.showtime import Showtime

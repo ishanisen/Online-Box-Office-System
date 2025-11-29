@@ -18,133 +18,270 @@ import uuid
 import csv
 import os
 
-def save_ticket_to_csv(ticket, customer=None):
-    """Append ticket to tickets.csv file"""
-    csv_file = "tickets.csv"
-    file_exists = os.path.isfile(csv_file)
+# def save_ticket_to_csv(ticket, customer=None):
+#     """Append ticket to tickets.csv file"""
+#     csv_file = "tickets.csv"
+#     file_exists = os.path.isfile(csv_file)
     
-    with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            # Write header if file doesn't exist
-            writer.writerow(["TicketId", "QRCode", "ShowtimeId", "SeatId", "OrderNumber", "CustomerEmail", "CustomerName"])
+#     with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
+#         writer = csv.writer(f)
+#         if not file_exists:
+#             # Write header if file doesn't exist
+#             writer.writerow(["TicketId", "QRCode", "ShowtimeId", "SeatId", "OrderNumber", "CustomerEmail", "CustomerName"])
         
-        customer_email = customer.email if customer else "Guest"
-        customer_name = f"{customer.firstName} {customer.lastName}" if customer else "Guest"
-        writer.writerow([ticket.ticketId, ticket.qrCode, ticket.showtimeId, ticket.seatId, ticket.orderNumber, customer_email, customer_name])
+#         customer_email = customer.email if customer else "Guest"
+#         customer_name = f"{customer.firstName} {customer.lastName}" if customer else "Guest"
+#         writer.writerow([ticket.ticketId, ticket.qrCode, ticket.showtimeId, ticket.seatId, ticket.orderNumber, customer_email, customer_name])
 
 
-def save_customer_to_csv(customer):
-    """Append customer to customers.csv file"""
-    csv_file = "customers.csv"
-    file_exists = os.path.isfile(csv_file)
+# def save_customer_to_csv(customer):
+#     """Append customer to customers.csv file"""
+#     csv_file = "customers.csv"
+#     file_exists = os.path.isfile(csv_file)
     
-    with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            # Write header if file doesn't exist
-            writer.writerow(["CustomerID", "FirstName", "LastName", "Email", "Password"])
-        writer.writerow([customer.customerId, customer.firstName, customer.lastName, customer.email, customer.password])
+#     with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
+#         writer = csv.writer(f)
+#         if not file_exists:
+#             # Write header if file doesn't exist
+#             writer.writerow(["CustomerID", "FirstName", "LastName", "Email", "Password"])
+#         writer.writerow([customer.customerId, customer.firstName, customer.lastName, customer.email, customer.password])
 
 
-def load_customers_from_csv():
-    """Load customers from CSV file into customers list"""
-    csv_file = "customers.csv"
-    if not os.path.isfile(csv_file):
-        return
+# def load_customers_from_csv():
     
-    with open(csv_file, mode='r', newline='', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            # Check if customer already exists (avoid duplicates)
-            if not any(c.customerID == row["CustomerID"] for c in customer):
-                customer = Customer(
-                    row["CustomerID"],
-                    row["FirstName"],
-                    row["LastName"],
-                    row["Email"],
-                    row["Password"]
-                )
-                customer.append(customer)
+#     """Load customers from CSV file into customers list"""
+#     csv_file = "customers.csv"
+#     if not os.path.isfile(csv_file):
+#         return
+    
+#     with open(csv_file, mode='r', newline='', encoding='utf-8') as f:
+#         reader = csv.DictReader(f)
+#         for row in reader:
+#             # Check if customer already exists (avoid duplicates)
+#             if not any(c.customerID == row["CustomerID"] for c in customer):
+#                 customer = Customer(
+#                     row["CustomerID"],
+#                     row["FirstName"],
+#                     row["LastName"],
+#                     row["Email"],
+#                     row["Password"]
+#                 )
+#                 customer.append(customer)
 
 # Read the CSV file containing all seat information
 all_seats = []
-with open("all_seats.csv", mode = 'r', newline='') as f:
+with open("all_seats.csv", mode='r', newline='', encoding='utf-8') as f:
     reader = csv.DictReader(f)
     for row in reader:
         all_seats.append({
-            "seatID": row["seat_id"],
-            "auditoriumID": row["auditorium_id"],
+            "seatID": row["seatID"],
+            "auditoriumID": row["auditoriumID"],
             "rowLabel": row["row_label"],
-            "seatNumber": int(row["seat_number"]),
+            "seatNumber": int(row["seatNumber"]),
             "label": row["label"],
             "taken": row["taken"] == "True"
         })
 
+# read the movies.csv file
+movies = []
+with open("movies.csv", mode='r', newline='', encoding='utf-8') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        movies.append({
+            "movieID": row["movieID"],
+            "title": row["title"],
+            "rating": row["rating"],
+            "runtimeMin": row["runtimeMin"],
+            "language": row["language"]
+        })
+
+# read theaters.csv file
+theaters = []
+with open("theaters.csv", mode='r', newline='', encoding='utf-8') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        theaters.append({
+            "theaterID": row["theaterID"],
+            "theaterName": row["theaterName"],
+            "location": row["location"],
+        })
+
+#read the auditoriums.csv file
+auditoriums = []
+with open("auditoriums.csv", mode='r', newline='', encoding='utf-8') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        auditoriums.append({
+            "auditoriumID": row["auditoriumID"],
+            "auditoriumName": row["auditoriumName"],
+            "theaterId": row["theaterID"],
+        })   
+
+#read the showtimes.csv file
+showtimes = []
+with open("showtimes.csv", mode='r', newline='', encoding='utf-8') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        showtimes.append({
+            "showtimeID": row["showtimeID"],
+            "datetime": row["datetime"],
+            "movieID": row["movieID"],
+            "auditoriumID": row["auditoriumID"],
+        })  
+
+#test function to print from the csv files
+# print("Loaded seats:", len(all_seats))
+# print(all_seats[:5])   # show first 5 rows
+
+# print("Loaded movies:", len(movies))
+# print(movies[:5])
+
+# print("Loaded theaters:", len(theaters))
+# print(theaters[:5])
+
+# print("Loaded auditoriums:", len(auditoriums))
+# print(auditoriums[:5])
+
+# print("Loaded showtimes:", len(showtimes))
+# print(showtimes[:5])
+
+
 # def login_or_register():
+#     """
+#     Offer login / register / guest options.
+#     Returns: Customer object on successful login/register, or None for guest / failed login.
+#     """
 #     print("\n1) Login\n2) Register\n3) Continue as Guest")
 #     choice = input("Choose option: ").strip()
+
 #     if choice == "1":
 #         email = input("Email: ").strip()
 #         pwd = input("Password: ").strip()
-#         user = next((u for u in customers if u.email == email and u.password == pwd), None)
-#         if user:
-#             print(f"Welcome back, {user.firstName}!\n")
-#             return user
-#         else:
-#             print("Invalid login.")
-#             return None
 
 #     elif choice == "2":
-#         cid = "C" + str(100 + len(customers) + 1)
+#         # Collect registration info
+#         em = input("Email: ").strip()
 #         fn = input("First name: ").strip()
 #         ln = input("Last name: ").strip()
-#         em = input("Email: ").strip()
-#         pw = input("Password: ").strip()
-#         user = Customer(cid, fn, ln, em, pw)
-#         customers.append(user)
-#         save_customer_to_csv(user)
-#         print(f"Registered. Welcome, {fn}!\n")
-#         return user
 
-#     else:
-#         print("Continuing as guest.\n")
-#         return None
+#         # ask for password twice
+#         while True:
+#             pw = input("Password: ").strip()
+#             pw2 = input("Confirm password: ").strip()
+#             if pw != pw2:
+#                 print("Passwords do not match. Try again.")
+#             elif pw == "":
+#                 print("Password cannot be empty. Try again.")
+#             else:
+#                 break
+
+        # # generate a customer id (simple deterministic scheme or use uuid)
+        # cid = "C" + str(100 + len(customers) + 1)
+
+        # user = Customer(cid, fn, ln, em, pw)
+        # customers.append(user)
+
+        # # call your save function if present; catch exceptions so registration doesn't crash
+        # try:
+        #     save_customer_to_csv(user)
+        # except NameError:
+        #     # save function not defined — ignore, but inform developer
+        #     pass
+        # except Exception as e:
+        #     print(f"Warning: failed to save new customer to CSV: {e}")
+
+        # print(f"Registered. Welcome, {fn}!\n")
+        # return user
+
+    # else:
+    #     print("Continuing as guest.\n")
+    #     return None
 
 
-# def display_movies():
-#     print("\n=== Available Movies ===")
-#     for m in movies:
-#         print(f"{m.movieId}: {m.title} — {m.rating} — {m.runtimeMin} min")
-#     print()
+# displays movie in a table form
+def display_movies():
+    global movies
+    print("\n=== Available Movies ===")
+    # Header
+    print("{:<6} {:<25} {:<8} {:<10}".format("ID", "Title", "Rating", "Runtime"))
+    print("-" * 55)
+    
+    # Rows
+    for m in movies:
+        print("{:<6} {:<25} {:<8} {:<10}".format(
+            m["movieID"], m["title"], m["rating"], str(m["runtimeMin"]) + " min"
+        ))
+    print()
 
 
-# def select_movie():
-#     display_movies()
-#     mid = input("Enter movie ID to view showtimes (or 'q' to quit): ").strip()
-#     if mid.lower() == "q":
-#         return None
-#     movie = find_movie(mid, movies)
-#     if not movie:
-#         print("Movie not found.")
-#         return None
-#     sts = find_showtimes_for_movie(mid, showtimes)
-#     if not sts:
-#         print("No showtimes.")
-#         return None
-#     print(f"\nShowtimes for {movie.title}:")
-#     for s in sts:
-#         aud = find_auditorium(s.auditoriumId, auditoriums)
-#         aud_name = aud.name if aud else s.auditoriumId
-#         print(f"{s.showtimeId}: {s.startAt} — {aud_name} (Aud {s.auditoriumId})")
-#     sid = input("Enter showtime ID to select (or 'b' to go back): ").strip()
-#     if sid.lower() == "b":
-#         return None
-#     st = next((x for x in sts if x.showtimeId == sid), None)
-#     if not st:
-#         print("Showtime not found.")
-#         return None
-#     return st
+def find_auditorium_by_id(aud_id):
+    return next((a for a in auditoriums if a.get("auditoriumID") == aud_id), None)
+
+def find_theater_by_id(t_id):
+    return next((t for t in theaters if t.get("theaterID") == t_id), None)
+
+def display_showtimes(movie_id):
+    """
+    Show showtimes for movie_id with theater name + location (no auditorium shown).
+    Uses:
+      - showtimes: list of dicts with keys 'showtimeID','datetime','movieID','auditoriumID'
+      - auditoriums: list of dicts with keys 'auditoriumID','auditoriumName','theaterID'
+      - theaters: list of dicts with keys 'theaterID','theaterName','location'
+    """
+    filtered = [s for s in showtimes if s.get("movieID") == movie_id]
+    if not filtered:
+        print(f"\nNo showtimes available for movie {movie_id}.\n")
+        return
+
+    header = "{:<12} {:<20} {:<25} {:<40}".format("ShowtimeID", "Date/Time", "Theater", "Location")
+    print(f"\n=== Showtimes for {movie_id} ===")
+    print(header)
+    print("-" * len(header))
+
+    for s in filtered:
+        aud_id = s.get("auditoriumID")
+        aud = find_auditorium_by_id(aud_id)
+        theater_name = "Unknown Theater"
+        theater_location = "Unknown Location"
+
+        if aud:
+            # auditorium stores the theater id in'theaterID'
+            th_id =  aud.get("theaterID")
+            theater = find_theater_by_id(th_id)
+            if theater:
+                theater_name = theater.get("theaterName", theater_name)
+                theater_location = theater.get("location", theater_location)
+        else:
+            # fallback: maybe show the raw auditorium id so dev can debug
+            theater_name = f"(aud {aud_id})"
+
+        print("{:<12} {:<20} {:<25} {:<40}".format(
+            s.get("showtimeID", ""),
+            s.get("datetime", ""),
+            theater_name,
+            theater_location
+        ))
+    print()
+
+def select_movie():
+    """Displays movies, lets user pick one, then shows its showtimes."""
+    
+    while True:
+        display_movies()
+        movie_id = input("Enter Movie ID to view showtimes: ").strip()
+        
+        # Check if movie exists
+        if any(m["movieID"] == movie_id for m in movies):
+            display_showtimes(movie_id)
+            #return movie_id   # so you can use it later
+        else:
+            print("Invalid Movie ID. Please try again.\n")
+
+def select_showtime():
+
+    
+# selected_movie = select_movie()
+# print("User selected:", selected_movie)     
 
 
 # def display_seats_for_showtime(showtime):
