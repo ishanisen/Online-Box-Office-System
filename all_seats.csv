@@ -1,4 +1,4 @@
-seat_id,auditorium_id,row_label,seat_number,label,taken
+seatID,auditoriumID,row_label,seatNumber,label,taken
 A01-A1,A01,A,1,A1,False
 A01-A2,A01,A,2,A2,False
 A01-A3,A01,A,3,A3,False
