@@ -1,14 +1,7 @@
-# from utils.utils import find_movie, find_showtimes_for_movie, find_auditorium, \
- #   get_seats_for_auditorium, find_seat_by_label, generate_id
-
-
-from src.movie import Movie
-from src.theater import Theater
-from src.auditorium import Auditorium
 from src.order import Order
 from src.payment import Payment
 from src.ticket import Ticket
-from src.customer import Customer  # ensure class path matches your project
+from src.customer import Customer
 
 import uuid
 import csv
@@ -103,7 +96,7 @@ def save_customer_to_csv(customer):
         writer = csv.writer(f)
         if not file_exists:
             # Write header if file doesn't exist
-            writer.writerow(["CustomerID", "FirstName", "LastName", "Email", "Password"])
+            writer.writerow(["CustomerId", "FirstName", "LastName", "Email", "Password"])
         writer.writerow([customer.customerID, customer.firstName, customer.lastName, customer.email, customer.password])
 
 
@@ -117,17 +110,17 @@ def load_customers_from_csv():
         reader = csv.DictReader(f)
         for row in reader:
 
-            # Skip rows missing CustomerID
-            if not row.get("CustomerID"):
+            # Skip rows missing CustomerId
+            if not row.get("CustomerId"):
                 continue
 
             # Avoid duplicates: check by customerID
-            if any(c.customerID == row["CustomerID"] for c in customers):
+            if any(c.customerID == row["CustomerId"] for c in customers):
                 continue
 
             # Create Customer object and append
             c = Customer(
-                row.get("CustomerID", ""),
+                row.get("CustomerId", ""),
                 row.get("FirstName", ""),
                 row.get("LastName", ""),
                 row.get("Email", ""),
@@ -212,10 +205,13 @@ def display_movies():
 
 #Helper Functions
 def find_auditorium_by_id(aud_id):
-    return next((a for a in auditoriums if a.get("auditoriumID") == aud_id), None)
+    aud_id = str(aud_id)
+    return next((a for a in auditoriums if str(a["auditoriumID"]) == aud_id), None)
 
-def find_theater_by_id(t_id):
-    return next((t for t in theaters if t.get("theaterID") == t_id), None)
+def find_theater_by_id(tid):
+    tid = str(tid)
+    return next((t for t in theaters if str(t["theaterID"]) == tid), None)
+
 
 def get_seats_for_auditorium(aud_id):
     return [s for s in all_seats if s["auditoriumID"] == aud_id]
@@ -286,7 +282,7 @@ def select_movie():
 def select_showtime(movie_id):
     """Displays showtimes for a given movie and lets user pick one."""
     display_showtimes(movie_id)
-    showtime_id = input("Enter Showtime ID to view seats").strip()
+    showtime_id = input("Enter Showtime ID to view seats: ").strip()
     if any(s["showtimeID"] == showtime_id for s in showtimes):
         return showtime_id
     else:
@@ -303,11 +299,16 @@ def display_seats_for_showtime(showtime_id):
     """
     selected_showtime = next((s for s in showtimes if s["showtimeID"] == showtime_id), None)
 
-    if selected_showtime:
-        aud_id = selected_showtime["auditoriumID"]
-    else:
+    if not selected_showtime:
         print("Showtime not found.")
+        return
+    
+    aud_id = selected_showtime["auditoriumID"]
     seats = get_seats_for_auditorium(aud_id)
+    
+    if not seats:
+        print(f"No seats found for auditorium {aud_id}")
+        return
 
     # Group seats by row
     rows = {}
@@ -336,12 +337,132 @@ def display_seats_for_showtime(showtime_id):
 
 def select_seat(showtime_id):
     display_seats_for_showtime(showtime_id)
-    seat_id = input("Enter seat ID to reserve: ").strip()
-    if any(s["seatID"] == seat_id for s in all_seats):
-        return seat_id
-    else:
+    seat_label = input("Enter seat ID to reserve: ").strip().upper()
+    
+    # Get the showtime and its auditorium
+    selected_showtime = next((s for s in showtimes if s["showtimeID"] == showtime_id), None)
+    if not selected_showtime:
+        print("Showtime not found.")
+        return None
+    
+    aud_id = selected_showtime["auditoriumID"]
+    
+    # Find seat by label AND auditorium (not just label!)
+    matching_seat = next((s for s in all_seats if s["label"] == seat_label and s["auditoriumID"] == aud_id), None)
+    if not matching_seat:
         print("Invalid Seat ID. Please try again.")
         return None
+    
+    # Check if seat is already taken
+    if matching_seat["taken"]:
+        print(f"Seat {seat_label} is already taken. Please choose another seat.")
+        return None
+    
+    return matching_seat["seatID"]
+
+
+def checkout(customer, showtime_id, seat_id):
+    """Process payment and create ticket"""
+    # Get seat object
+    seat = next((s for s in all_seats if s["seatID"] == seat_id), None)
+    if not seat:
+        print("Seat not found.")
+        return None
+    
+    if seat["taken"]:
+        print("Seat already taken.")
+        return None
+    
+    # Get showtime and movie info
+    showtime = next((st for st in showtimes if st["showtimeID"] == showtime_id), None)
+    movie = next((m for m in movies if m["movieID"] == showtime["movieID"]), None) if showtime else None
+    auditorium = next((a for a in auditoriums if a["auditoriumID"] == showtime["auditoriumID"]), None) if showtime else None
+    theater = next((t for t in theaters if t["theaterID"] == auditorium["theaterId"]), None) if auditorium else None
+    
+    # Pricing
+    price = 12.00
+    fees = 1.50
+    tax = round((price + fees) * 0.13, 2)
+    
+    # Create order
+    orderNumber = f"ORD-{uuid.uuid4().hex[:8].upper()}"
+    order = Order(orderNumber, price, fees, tax)
+    
+    # Display order summary
+    print("\n" + "="*50)
+    print("ORDER SUMMARY")
+    print("="*50)
+    print(f"Movie: {movie['title'] if movie else 'Unknown'}")
+    print(f"Theater: {theater['theaterName'] if theater else 'Unknown'}")
+    print(f"Location: {theater['location'] if theater else 'Unknown'}")
+    print(f"Auditorium: {auditorium['auditoriumName'] if auditorium else 'Unknown'}")
+    print(f"Showtime: {showtime['datetime'] if showtime else 'Unknown'}")
+    print(f"Seat: {seat['label']}")
+    print(f"\nSubtotal: ${price:.2f}")
+    print(f"Fees: ${fees:.2f}")
+    print(f"Tax: ${tax:.2f}")
+    print(f"TOTAL: ${order.grandTotal:.2f}")
+    print("="*50)
+    
+    confirm = input("\nProceed to payment? (y/n): ").strip().lower()
+    if confirm != "y":
+        print("Order cancelled.")
+        return None
+    
+    # Process payment
+    provider = input("Enter payment provider (Visa/MasterCard/Debit): ").strip()
+    if not provider:
+        provider = "Card"
+    
+    paymentId = f"PAY-{uuid.uuid4().hex[:8].upper()}"
+    payment = Payment(paymentId, order.grandTotal, provider, "Completed")
+    
+    # Mark seat as taken
+    seat["taken"] = True
+    
+    # Update CSV to mark seat as taken
+    with open("all_seats.csv", mode='r', newline='', encoding='utf-8') as f:
+        rows = list(csv.DictReader(f))
+    
+    for row in rows:
+        if row["seatID"] == seat_id:
+            row["taken"] = "True"
+    
+    with open("all_seats.csv", mode='w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=["seatID", "auditoriumID", "row_label", "seatNumber", "label", "taken"])
+        writer.writeheader()
+        writer.writerows(rows)
+    
+    # Create ticket
+    ticketId = f"TKT-{uuid.uuid4().hex[:8].upper()}"
+    qr = "QR-" + uuid.uuid4().hex[:10]
+    
+    # Save ticket to CSV
+    csv_file = "tickets.csv"
+    file_exists = os.path.isfile(csv_file)
+    
+    with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(["TicketId", "QRCode", "ShowtimeId", "SeatId", "OrderNumber", "CustomerEmail", "CustomerName"])
+        
+        customer_email = customer.email if customer else "Guest"
+        customer_name = f"{customer.firstName} {customer.lastName}" if customer else "Guest"
+        writer.writerow([ticketId, qr, showtime_id, seat_id, orderNumber, customer_email, customer_name])
+    
+    print("\n" + "="*50)
+    print("PAYMENT SUCCESSFUL!")
+    print("="*50)
+    print(f"Payment ID: {paymentId}")
+    print(f"Amount Charged: ${payment.amount:.2f}")
+    print(f"Payment Method: {payment.paymentProvider}")
+    print(f"\nTicket ID: {ticketId}")
+    print(f"QR Code: {qr}")
+    print(f"Seat: {seat['label']}")
+    print("="*50)
+    print("\nYour ticket has been saved. Enjoy your movie!\n")
+    
+    return ticketId
 
 # def choose_seat(showtime):
 #     display_seats_for_showtime(showtime)
@@ -406,9 +527,28 @@ def select_seat(showtime_id):
 
 
 
+def book_movie(customer):
+    """Extracted repeated booking flow into single function"""
+    movie_id = None
+    while not movie_id:
+        movie_id = select_movie()
+    
+    showtime_id = None
+    while not showtime_id:
+        showtime_id = select_showtime(movie_id)
+    
+    seat_id = None
+    while not seat_id:
+        seat_id = select_seat(showtime_id)
+    
+    # Process checkout
+    checkout(customer, showtime_id, seat_id)
+
+
 # Main Application Loop
 def main():
     load_customers_from_csv() #preload saved customers
+    current_user = None
     
 
     while True:
@@ -421,27 +561,11 @@ def main():
         choice = input("Choose option: ").strip()
 
         if choice == "1":
-            login_or_register()
-            movie_id = None
-            while not movie_id:
-                movie_id = select_movie()
-            showtime_id = None
-            while not showtime_id:
-                showtime_id = select_showtime(movie_id)
-            seat_id = None
-            while not seat_id:
-                seat_id = select_seat(showtime_id)
+            current_user = login_or_register()
+            book_movie(current_user)
 
         elif choice == "2":
-            movie_id = None
-            while not movie_id:
-                movie_id = select_movie()
-            showtime_id = None
-            while not showtime_id:
-                showtime_id = select_showtime(movie_id)
-            seat_id = None
-            while not seat_id:
-                seat_id = select_seat(showtime_id)
+            book_movie(current_user)
         
         elif choice == "3":
             print("Goodbye!")
