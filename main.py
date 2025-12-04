@@ -2,6 +2,7 @@ from src.order import Order
 from src.payment import Payment
 from src.ticket import Ticket
 from src.customer import Customer
+from io import StringIO
 
 import uuid
 import csv
@@ -45,6 +46,9 @@ with open("theaters.csv", mode='r', newline='', encoding='utf-8') as f:
             "location": row["location"],
         })
 
+
+
+
 #read the auditoriums.csv file
 auditoriums = []
 with open("auditoriums.csv", mode='r', newline='', encoding='utf-8') as f:
@@ -53,7 +57,7 @@ with open("auditoriums.csv", mode='r', newline='', encoding='utf-8') as f:
         auditoriums.append({
             "auditoriumID": row["auditoriumID"],
             "auditoriumName": row["auditoriumName"],
-            "theaterId": row["theaterID"],
+            "theaterID": row["theaterID"],
         })   
 
 #read the showtimes.csv file
@@ -205,12 +209,17 @@ def display_movies():
 
 #Helper Functions
 def find_auditorium_by_id(aud_id):
-    aud_id = str(aud_id)
-    return next((a for a in auditoriums if str(a["auditoriumID"]) == aud_id), None)
+    if aud_id is None:
+        return None
+    aud_id_s = str(aud_id).strip()
+    return next((a for a in auditoriums if str(a.get("auditoriumID", "")).strip() == aud_id_s), None)
+
 
 def find_theater_by_id(tid):
-    tid = str(tid)
-    return next((t for t in theaters if str(t["theaterID"]) == tid), None)
+    if tid is None:
+        return None
+    tid_s = str(tid).strip()
+    return next((t for t in theaters if str(t.get("theaterID", "")).strip() == tid_s), None)
 
 
 def get_seats_for_auditorium(aud_id):
@@ -218,18 +227,12 @@ def get_seats_for_auditorium(aud_id):
 
 def mark_seat_taken(seatID):
     for s in all_seats:
-        if s["seatID"] == seatID:
+        if s.get("seatID") == seatID:
             s["taken"] = True
-        break
+            break
+
 
 def display_showtimes(movie_id):
-    """
-    Show showtimes for movie_id with theater name + location (no auditorium shown).
-    Uses:
-      - showtimes: list of dicts with keys 'showtimeID','datetime','movieID','auditoriumID'
-      - auditoriums: list of dicts with keys 'auditoriumID','auditoriumName','theaterID'
-      - theaters: list of dicts with keys 'theaterID','theaterName','location'
-    """
     filtered = [s for s in showtimes if s.get("movieID") == movie_id]
     if not filtered:
         print(f"\nNo showtimes available for movie {movie_id}.\n")
@@ -241,21 +244,32 @@ def display_showtimes(movie_id):
     print("-" * len(header))
 
     for s in filtered:
-        aud_id = s.get("auditoriumID")
-        aud = find_auditorium_by_id(aud_id)
         theater_name = "Unknown Theater"
         theater_location = "Unknown Location"
 
+        aud_id = s.get("auditoriumID")
+        aud = find_auditorium_by_id(aud_id)
         if aud:
-            # auditorium stores the theater id in'theaterID'
-            th_id =  aud.get("theaterID")
+            th_id = aud.get("theaterID")
             theater = find_theater_by_id(th_id)
             if theater:
                 theater_name = theater.get("theaterName", theater_name)
                 theater_location = theater.get("location", theater_location)
+            else:
+                theater_name = f"(aud {aud.get('auditoriumName','?')})"
+                theater_location = f"(theater id {th_id} not found)"
         else:
-            # fallback: maybe show the raw auditorium id so dev can debug
-            theater_name = f"(aud {aud_id})"
+            direct_th_id = s.get("theaterID") or s.get("theatreID")
+            if direct_th_id is not None:
+                theater = find_theater_by_id(direct_th_id)
+                if theater:
+                    theater_name = theater.get("theaterName", theater_name)
+                    theater_location = theater.get("location", theater_location)
+                else:
+                    theater_name = f"(theater id {direct_th_id} not found)"
+            else:
+                if aud_id is not None:
+                    theater_name = f"(aud {aud_id})"
 
         print("{:<12} {:<20} {:<25} {:<40}".format(
             s.get("showtimeID", ""),
