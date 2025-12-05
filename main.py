@@ -3,7 +3,8 @@ from src.payment import Payment
 from src.ticket import Ticket
 from src.customer import Customer
 from io import StringIO
-
+from utilities import hash_password, verify_password, ensure_hashed_password
+from utilities import sanitize_string, is_valid_email, is_strong_password, name_ok, email_unique
 import uuid
 import csv
 import os
@@ -143,37 +144,70 @@ def login_or_register():
         choice = input("Choose option: ").strip()
 
         if choice == "1":
-            email = input("Email: ").strip()
-            pwd = input("Password: ").strip()
-            # simple login check
-            found = next((c for c in customers if c.email == email and c.password == pwd), None)
-            if found:
+            email = sanitize_string(input("Email: "))
+            pwd = input("Password: ").strip()  # do not sanitize password (preserve whitespace if user intended)
+            if not is_valid_email(email):
+                print("Invalid email format. Try again.\n")
+                continue
+
+            found = next((c for c in customers if c.email.strip().lower() == email.lower()), None)
+
+            if not found:
+                print("No account with that email. Try registering.\n")
+                continue
+
+            if verify_password(pwd, found.password):
+                try:
+                    ensure_hashed_password(found, save_customer_to_csv)
+                except Exception as e:
+                    print(f"Warning: failed to upgrade stored password hashing: {e}")
                 print(f"Welcome back, {found.firstName}!")
                 return found
             else:
-                print("Login failed. Try again or register.\n")
+                # Don't reveal whether email exists — but we already validated existence above.
+                print("Login failed. Check credentials and try again.\n")
 
         elif choice == "2":
-            # collect registration info
-            em = input("Email: ").strip()
-            fn = input("First Name: ").strip()
-            ln = input("Last Name: ").strip()
+            # collect and validate registration info
+            em = sanitize_string(input("Email: "))
+            if not is_valid_email(em):
+                print("Invalid email. Please use a valid email address.\n")
+                continue
+            if not email_unique(em, customers):
+                print("An account with that email already exists. Try logging in or use a different email.\n")
+                continue
 
-            # ask for password twice 
+            fn = sanitize_string(input("First Name: "))
+            if not name_ok(fn):
+                print("First name cannot be empty and must be reasonably short.\n")
+                continue
+
+            ln = sanitize_string(input("Last Name: "))
+            if not name_ok(ln):
+                print("Last name cannot be empty and must be reasonably short.\n")
+                continue
+
+            # ask for password twice with validation
             while True:
-                pw = input("Password: ").strip()
-                pw2 = input("Confirm Password: ").strip()
+                print("Password: \n - must have atleast 8 characters\n - include one digit atleast\n - should include both upper and lower case letters\n - must include at least one special character (e.g. !@#$%) ")
+                pw = input("Enter New Password: ")
+                pw2 = input("Confirm Password: ")
                 if pw != pw2:
                     print("Passwords do not match. Try again.")
-                elif pw == "":
-                    print("Password cannot be empty. Try again.")
-                else:
-                    break
+                    continue
+                ok, msg = is_strong_password(pw)
+                if not ok:
+                    print(f"Password not strong enough: {msg} Try again.")
+                    continue
+                break
+
+            # hash the validated password before storing
+            pw_hash = hash_password(pw)
 
             # generate a customer id
             cid = "C" + str(100 + len(customers) + 1)
 
-            user = Customer(cid, fn, ln, em, pw)
+            user = Customer(cid, fn, ln, em, pw_hash)
             customers.append(user)
 
             try:
@@ -391,7 +425,7 @@ def checkout(customer, showtime_id, seat_id):
     showtime = next((st for st in showtimes if st["showtimeID"] == showtime_id), None)
     movie = next((m for m in movies if m["movieID"] == showtime["movieID"]), None) if showtime else None
     auditorium = next((a for a in auditoriums if a["auditoriumID"] == showtime["auditoriumID"]), None) if showtime else None
-    theater = next((t for t in theaters if t["theaterID"] == auditorium["theaterId"]), None) if auditorium else None
+    theater = next((t for t in theaters if t["theaterID"] == auditorium["theaterID"]), None) if auditorium else None
     
     # Pricing
     price = 12.00
@@ -556,7 +590,7 @@ def book_movie(customer):
         seat_id = select_seat(showtime_id)
     
     # Process checkout
-    checkout(customer, showtime_id, seat_id)
+    #checkout(customer, showtime_id, seat_id)
 
 
 # Main Application Loop
@@ -589,7 +623,54 @@ def main():
             print("Invalid option. Please try again")
 
 
+
 if __name__ == "__main__":
 
     main()
+    
+    
+# def read_csv_to_dict(path):
+#     """Utility function to read CSV into list of dicts"""
+#     with open(path, newline='', encoding='utf-8') as f:
+#         reader = csv.DictReader(f)
+#         return list(reader)
+
+# def book_movie_noninteractive(customer=None):
+#     """Non-interactive booking: automatically select first movie and showtime"""
+#    # Read CSV files directly
+#     movies = read_csv_to_dict("movies.csv")
+#     showtimes = read_csv_to_dict("showtimes.csv")
+
+#     # Pick the first movie automatically
+#     selected_movie = movies[0]
+    
+#     # Filter showtimes for this movie
+#     movie_showtimes = [s for s in showtimes if s['movieID'] == selected_movie['movieID']]
+    
+#     # Pick the first available showtime
+#     selected_showtime = movie_showtimes[0]
+
+#     # Display seating chart
+#     print(f"\nSeating chart for '{selected_movie['title']}' at {selected_showtime['datetime']}:")
+#     display_seats_for_showtime(selected_showtime['showtimeID'])
+
+#     # Optionally, book the first available seat
+#     # first_available_seat = find_first_available_seat(selected_showtime['showtimeID'])
+#     # book_seat(customer, selected_showtime['showtimeID'], first_available_seat)
+
+#     return selected_movie, selected_showtime
+
+# def main_noninteractive():
+#     load_customers_from_csv()  # preload customers
+#     current_user = None  # guest user
+
+#     # Automatically book a movie
+#     movie, showtime = book_movie_noninteractive(current_user)
+#     print(f"\nAutomatically selected movie: {movie['title']}")
+#     print(f"Automatically selected showtime: {showtime['datetime']}")
+  
+    
+# if __name__ == "__main__":
+
+#     main_noninteractive()
     
