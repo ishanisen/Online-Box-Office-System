@@ -1,8 +1,5 @@
 CustomerId,FirstName,LastName,Email,Password
 C103,test,1,test1@,123
-C101,Ishani,Sen,ishani.sen@dal.ca,dal123
-C101,Ishani,Sen,ishani.sen@dal.ca,dal123
-C101,Ishani,Sen,ishani.sen@dal.ca,dal23
-C103,Ishani,Sen,ishanisen@gmail.com,$2b$12$AkU7/ndtLDxy1VFe2B.xw.nH6K8hK.KxDkCwYXBxzsrmfo4p4t9ZG
 
-C103,Ishani,Sen,Ishanisen@dal.ca,$2b$12$y963CNsby4TUEqzHtZm3De.y1Vs3yMiVAz18ny/FnrdgQmqz4zmmu
+C102,Ishani,Sen,ishani.sen@dal.ca,$2b$12$1Rk0o9QjMBTS6ZwjJaOBH.ckYZQ5u6M1eT..vYAGk6MsaJD4gluMG
+C103,Ishani,Sen,ishanisen0610@gmail.com,$2b$12$uqrbMCvmOf5muWIlH3x/Ou034Cvm7dcrXy7UXHjRxfh/QFf.1WVxm

@@ -1,10 +1,7 @@
-# auth_helpers.py
 import bcrypt
 import re
 from typing import Optional
 from src.customer import Customer
-
-
 from typing import List
 
 
@@ -45,7 +42,7 @@ def email_unique(email: str, customers: List[Customer]) -> bool:
     email = email.strip().lower()
     return all(c.email.strip().lower() != email for c in customers)
 
-BCRYPT_ROUNDS = 12  # adjust for your server CPU; 12 is a reasonable default
+BCRYPT_ROUNDS = 12  
 
 def hash_password(plain: str) -> str:
     """Return bcrypt hash (utf-8 string) for a plaintext password."""
@@ -66,7 +63,7 @@ def verify_password(plain: str, stored_hash: str) -> bool:
             return bcrypt.checkpw(plain.encode('utf-8'), stored_hash.encode('utf-8'))
         except ValueError:
             return False
-    # Backwards-compat: stored password was plaintext (legacy). Compare and allow re-hash after success.
+    # Backwards-compat: stored password was plaintext. Compare and allow re-hash after success.
     return plain == stored_hash
 
 def ensure_hashed_password(user: Customer, save_callback) -> None:

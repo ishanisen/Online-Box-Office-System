@@ -1,5 +1,5 @@
 seatID,auditoriumID,row_label,seatNumber,label,taken
-A01-A1,A01,A,1,A1,False
+A01-A1,A01,A,1,A1,True
 A01-A2,A01,A,2,A2,False
 A01-A3,A01,A,3,A3,False
 A01-A4,A01,A,4,A4,False

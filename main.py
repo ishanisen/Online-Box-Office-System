@@ -74,20 +74,22 @@ with open("showtimes.csv", mode='r', newline='', encoding='utf-8') as f:
         })  
 
 
-# def save_ticket_to_csv(ticket, customer=None):
-#     """Append ticket to tickets.csv file"""
-#     csv_file = "tickets.csv"
-#     file_exists = os.path.isfile(csv_file)
-    
-#     with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
-#         writer = csv.writer(f)
-#         if not file_exists:
-#             # Write header if file doesn't exist
-#             writer.writerow(["TicketId", "QRCode", "ShowtimeId", "SeatId", "OrderNumber", "CustomerEmail", "CustomerName"])
-        
-#         customer_email = customer.email if customer else "Guest"
-#         customer_name = f"{customer.firstName} {customer.lastName}" if customer else "Guest"
-#         writer.writerow([ticket.ticketId, ticket.qrCode, ticket.showtimeId, ticket.seatId, ticket.orderNumber, customer_email, customer_name])
+def load_seats_from_csv():
+    """Reload all seats from CSV file"""
+    global all_seats
+    all_seats = []
+    with open("all_seats.csv", mode='r', newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            all_seats.append({
+                "seatID": row["seatID"],
+                "auditoriumID": row["auditoriumID"],
+                "rowLabel": row["row_label"],
+                "seatNumber": int(row["seatNumber"]),
+                "label": row["label"],
+                "taken": row["taken"] == "True"
+            })
+
 
 #Global customers list used by other function
 customers= []
@@ -481,6 +483,9 @@ def checkout(customer, showtime_id, seat_id):
         writer.writeheader()
         writer.writerows(rows)
     
+    # Reload seats to keep in-memory data in sync
+    load_seats_from_csv()
+    
     # Create ticket
     ticketId = f"TKT-{uuid.uuid4().hex[:8].upper()}"
     qr = "QR-" + uuid.uuid4().hex[:10]
@@ -512,68 +517,6 @@ def checkout(customer, showtime_id, seat_id):
     
     return ticketId
 
-# def choose_seat(showtime):
-#     display_seats_for_showtime(showtime)
-#     row = input("Enter row (e.g., A): ").strip().upper()
-#     num = input("Enter seat number (e.g., 3): ").strip()
-#     if not num.isdigit():
-#         print("Invalid seat number.")
-#         return None
-#     num = int(num)
-#     seat = find_seat_by_label(showtime.auditoriumId, row, num, seats)
-#     if not seat:
-#         print("Seat not found.")
-#         return None
-#     if seat.taken:
-#         print("Seat already taken. Choose another.")
-#         return None
-#     return seat
-
-
-# def checkout(customer, showtime, seat):
-#     # pricing (simple)
-#     price = 12.00
-#     fees = 1.50
-#     tax = round((price + fees) * 0.13, 2)  # example tax
-#     orderNumber = generate_id("ORD-")
-#     order = Order(orderNumber, price, fees, tax)
-#     print("\n--- Order Summary ---")
-#     movie = find_movie(showtime.movieId, movies)
-#     aud = find_auditorium(showtime.auditoriumId, auditoriums)
-#     print(f"Movie: {movie.title if movie else showtime.movieId}")
-#     print(f"Showtime: {showtime.startAt} in {aud.name if aud else showtime.auditoriumId}")
-#     print(f"Seat: {seat.label()}")
-#     print(order)
-#     confirm = input("Proceed to payment? (y/n): ").strip().lower()
-#     if confirm != "y":
-#         print("Order cancelled.")
-#         return None
-
-#     provider = input("Enter payment provider (e.g., Visa, Stripe): ").strip()
-#     paymentId = generate_id("PAY-")
-#     payment = Payment(paymentId, order.grandTotal, provider, "Completed")
-#     payments.append(payment)
-#     orders.append(order)
-
-#     # finalize seat and ticket
-#     seat.taken = True
-#     ticketId = generate_id("TKT-")
-#     qr = "QR-" + uuid.uuid4().hex[:10]
-#     ticket = Ticket(ticketId, qr, showtime.showtimeId, seat.seatId, order.orderNumber)
-#     tickets.append(ticket)
-#     if customer:
-#         customer.orders.append(order)
-
-#     # Save ticket to CSV
-#     save_ticket_to_csv(ticket, customer)
-
-#     print("\nPayment successful!")
-#     print(payment)
-#     print("Your ticket:")
-#     print(ticket)
-#     return ticket
-
-
 
 def book_movie(customer):
     """Extracted repeated booking flow into single function"""
@@ -590,7 +533,7 @@ def book_movie(customer):
         seat_id = select_seat(showtime_id)
     
     # Process checkout
-    #checkout(customer, showtime_id, seat_id)
+    checkout(customer, showtime_id, seat_id)
 
 
 # Main Application Loop
@@ -623,54 +566,5 @@ def main():
             print("Invalid option. Please try again")
 
 
-
 if __name__ == "__main__":
-
     main()
-    
-    
-# def read_csv_to_dict(path):
-#     """Utility function to read CSV into list of dicts"""
-#     with open(path, newline='', encoding='utf-8') as f:
-#         reader = csv.DictReader(f)
-#         return list(reader)
-
-# def book_movie_noninteractive(customer=None):
-#     """Non-interactive booking: automatically select first movie and showtime"""
-#    # Read CSV files directly
-#     movies = read_csv_to_dict("movies.csv")
-#     showtimes = read_csv_to_dict("showtimes.csv")
-
-#     # Pick the first movie automatically
-#     selected_movie = movies[0]
-    
-#     # Filter showtimes for this movie
-#     movie_showtimes = [s for s in showtimes if s['movieID'] == selected_movie['movieID']]
-    
-#     # Pick the first available showtime
-#     selected_showtime = movie_showtimes[0]
-
-#     # Display seating chart
-#     print(f"\nSeating chart for '{selected_movie['title']}' at {selected_showtime['datetime']}:")
-#     display_seats_for_showtime(selected_showtime['showtimeID'])
-
-#     # Optionally, book the first available seat
-#     # first_available_seat = find_first_available_seat(selected_showtime['showtimeID'])
-#     # book_seat(customer, selected_showtime['showtimeID'], first_available_seat)
-
-#     return selected_movie, selected_showtime
-
-# def main_noninteractive():
-#     load_customers_from_csv()  # preload customers
-#     current_user = None  # guest user
-
-#     # Automatically book a movie
-#     movie, showtime = book_movie_noninteractive(current_user)
-#     print(f"\nAutomatically selected movie: {movie['title']}")
-#     print(f"Automatically selected showtime: {showtime['datetime']}")
-  
-    
-# if __name__ == "__main__":
-
-#     main_noninteractive()
-    
