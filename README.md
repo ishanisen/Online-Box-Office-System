@@ -1,75 +1,49 @@
-Online Box Office System
-A command-line movie ticket booking system developed in Python that simulates the core functionality of an online cinema box office.
+# Online Box Office System
+
+A **command-line movie ticket booking system** developed in **Python** that simulates the core functionality of an online cinema box office.  
 The system allows users to securely authenticate, browse movies and showtimes, select seats from a seating plan, and complete a ticket booking workflow with simulated payment processing.
 
-Features
-1. User Authentication
+---
 
-Register, login, or continue as a guest
+## Features
 
-Passwords securely hashed using bcrypt
+### User Authentication
+- Register, login, or continue as a guest  
+- Passwords securely hashed using **bcrypt**  
+- Email and password input validation  
 
-Email and password input validation
+### Movie & Showtime Browsing
+- Browse available movies  
+- View showtimes by location and date  
+- Display movie details (runtime, rating, synopsis)  
 
-2. Movie & Showtime Browsing
+### Seat Selection
+- Interactive seat map rendering  
+- Real-time seat availability (Available / Held / Sold)  
+- Prevents double-booking of seats  
 
-Browse available movies
+### Checkout & Ticketing
+- Simulated payment processing  
+- Order creation and ticket generation  
+- Seat inventory updated after successful booking  
 
-View showtimes by location and date
+### Testing & Performance
+- Unit and integration testing  
+- cProfile used to analyze runtime performance  
+- Deterministic non-interactive profiling mode  
 
-Display movie details (runtime, rating, synopsis)
+### Accessibility & Usability
+- Clear step-by-step instructions  
+- User-friendly error messages  
+- Keyboard-navigable interface  
+- Designed with POUR accessibility principles 
 
-3. Seat Selection
+---
 
-Interactive seat map rendering
+## 📂 Project Structure
 
-Real-time seat availability (Available / Held / Sold)
-
-Prevents double-booking of seats
-
-4. Checkout & Ticketing
-
-Simulated payment processing
-
-Order creation and ticket generation
-
-Seat inventory updated after successful booking
-
-5. Testing & Performance
-
-Unit and integration testing
-
-cProfile used to analyze runtime performance
-
-Deterministic non-interactive profiling mode
-
-6. Accessibility & Usability
-
-Clear step-by-step instructions
-
-User-friendly error messages
-
-Keyboard-navigable interface
-
-Designed with POUR accessibility principles in mind
-
-System Architecture
-
-Language: Python
-
-Architecture: Modular, client-server–style design
-
-Design Patterns Used:
-
-Factory Pattern (Ticket & Order creation)
-
-Strategy-style logic (Seat selection optimization)
-
-MVC-inspired separation of concerns
-
-Data Storage: CSV-based persistence (movies, users, showtimes, seats)
-
-Project Structure
+```text
+.
 ├── src/
 │   ├── __init__.py
 │   ├── customer.py        # Customer model & authentication logic
@@ -94,49 +68,6 @@ Project Structure
 ├── test_ticket.py
 ├── test_module_integration.py
 ├── test_system_workflow.py
+│
 └── README.md
 
-How to Run
-
-Clone the repository:
-
-git clone https://github.com/your-username/online-box-office-system.git
-
-
-Navigate to the project directory:
-
-cd online-box-office-system
-
-
-Install dependencies:
-
-pip install bcrypt
-
-
-Run the application:
-
-python main.py
-
-Testing
-
-Test cases derived from system use cases
-
-Covers:
-
-Authentication
-
-Seat selection
-
-Order creation
-
-Payment flow
-
-Data persistence
-
-100% pass rate achieved during final testing phase
-
-
-License
-
-This project was developed for academic purposes as part of ECED 3401 – COmputer Engineering Fundamentals.
-- 
